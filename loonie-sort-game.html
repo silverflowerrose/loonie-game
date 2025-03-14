@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Matching Game</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .match-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 500px;
+            margin-bottom: 40px;
+        }
+        .match-item {
+            width: 100px;
+            height: 50px;
+            background-color: white;
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .coin {
+            width: 80px;
+            height: 80px;
+            display: inline-block;
+            margin: 10px;
+            cursor: grab;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .coin:hover {
+            transform: scale(1.1);
+        }
+        .coin:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body>
+    <h1>Match the coins to the correct amount!</h1>
+    <div id="game-container">
+        <div class="match-area" id="amounts">
+            <!-- Amounts will be dynamically inserted here -->
+        </div>
+        <div class="match-area" id="coins">
+            <!-- Coins will be dynamically inserted here -->
+        </div>
+    </div>
+    <script>
+        const amounts = [0.01, 0.05, 0.10, 0.25, 1.00];
+        const coins = [
+            { value: 0.01, image: 'https://i.imgur.com/96XmQBX.png' }, // Penny
+            { value: 0.05, image: 'https://i.imgur.com/jlP9y2D.png' }, // Nickel
+            { value: 0.10, image: 'https://i.imgur.com/3fWNwhT.png' }, // Dime
+            { value: 0.25, image: 'https://i.imgur.com/F0DE7NZ.png' }, // Quarter
+            { value: 1.00, image: 'https://i.imgur.com/sXe7ZHU.png' }  // Loonie
+        ];
+
+        const amountsContainer = document.getElementById('amounts');
+        const coinsContainer = document.getElementById('coins');
+
+        amounts.forEach(amount => {
+            let div = document.createElement('div');
+            div.classList.add('match-item');
+            div.textContent = `$${amount.toFixed(2)}`;
+            div.dataset.amount = amount;
+            div.ondrop = drop;
+            div.ondragover = allowDrop;
+            amountsContainer.appendChild(div);
+        });
+
+        coins.forEach(coin => {
+            let div = document.createElement('div');
+            div.classList.add('coin');
+            div.style.backgroundImage = `url(${coin.image})`;
+            div.draggable = true;
+            div.dataset.value = coin.value;
+            div.ondragstart = drag;
+            coinsContainer.appendChild(div);
+        });
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function drag(event) {
+            event.dataTransfer.setData("value", event.target.dataset.value);
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            let droppedValue = parseFloat(event.dataTransfer.getData("value"));
+            let targetValue = parseFloat(event.target.dataset.amount);
+
+            if (droppedValue === targetValue) {
+                event.target.style.backgroundColor = "lightgreen";
+                event.target.textContent = `✔ $${targetValue.toFixed(2)}`;
+                playGumballSound();
+            } else {
+                event.target.style.backgroundColor = "lightcoral";
+                playWrongSound();
+                setTimeout(() => {
+                    event.target.style.backgroundColor = "white";
+                }, 1000);
+            }
+        }
+
+        function playWrongSound() {
+            const audio = new Audio('https://github.com/silverflowerrose/wronganswermp3/raw/refs/heads/main/wrong%20answer%20sound.mp3');
+            audio.play();
+        }
+
+        function playGumballSound() {
+            const audio = new Audio('https://github.com/silverflowerrose/gumball-sound/raw/refs/heads/main/item-pick-up-38258.mp3');
+            audio.play();
+        }
+    </script>
+</body>
+</html>
